@@ -81,7 +81,13 @@ function App() {
   );
 }
 
-function PlayerController(): null {
+function PlayerController({
+  translationSpeed = 2,
+  rotationSpeed = 2,
+}: {
+  translationSpeed?: number;
+  rotationSpeed?: number;
+}): null {
   const {
     // An array of connected `XRController`
     controllers,
@@ -102,84 +108,64 @@ function PlayerController(): null {
   const leftController = useController("left");
   const rightController = useController("right");
 
-  const arrowRef = useRef<any>();
-  const arrowRef2 = useRef<any>();
+  const arrowRef = useRef<THREE.ArrowHelper>();
 
-  const TRANSLATION_SPEED = 2;
-  const ROTATION_SPEED = 2;
-
-  // Check if vr sesion exist
+  const yBasisVector = new THREE.Vector3(0, 1, 0);
+  const zeroVector = new THREE.Vector3(0, 0, 0);
 
   useFrame(({ gl, scene, camera, controls, viewport, internal }, delta) => {
     if (!session) return null;
 
+    // In the future make player body turn when the camera reaches a certain threshold
+
+    const cameraWorldDireciton = camera
+      .getWorldDirection(new THREE.Vector3(0, 0, 0))
+      .normalize();
+
     // Player rotation
     const rightControllerGamepad = rightController?.inputSource.gamepad;
-    console.log("player rotation before", player.rotation.y);
     if (rightControllerGamepad) {
       if (rightControllerGamepad.axes[2]) {
-        // player.rotateY(
-        //   delta * ROTATION_SPEED * -rightControllerGamepad.axes[2]
-        // );
-        player.rotation.y +=
-          delta * ROTATION_SPEED * -rightControllerGamepad.axes[2];
-        const cameraWorldDirection = camera.getWorldDirection(
-          new THREE.Vector3()
-        );
+        player.rotateY(delta * rotationSpeed * -rightControllerGamepad.axes[2]);
       }
     }
-    console.log("player rotation after", player.rotation.y);
 
     // Player translation
     const leftControllerGamepad = leftController?.inputSource.gamepad;
     if (leftControllerGamepad) {
       if (leftControllerGamepad.axes[2]) {
         const translationDx =
-          delta * TRANSLATION_SPEED * leftControllerGamepad.axes[2];
+          delta * translationSpeed * leftControllerGamepad.axes[2];
         player.position.add(
           new THREE.Vector3(
-            camera
-              .getWorldDirection(new THREE.Vector3(0, 0, 0))
-              .cross(new THREE.Vector3(0, 1, 0)).x,
+            cameraWorldDireciton.cross(yBasisVector).x,
             0,
-            camera
-              .getWorldDirection(new THREE.Vector3(0, 0, 0))
-              .cross(new THREE.Vector3(0, 1, 0)).z
+            cameraWorldDireciton.cross(yBasisVector).z
           ).multiplyScalar(translationDx)
         );
       }
       if (leftControllerGamepad.axes[3]) {
         const translationDz =
-          delta * TRANSLATION_SPEED * leftControllerGamepad.axes[3];
+          delta * translationSpeed * leftControllerGamepad.axes[3];
         player.position.add(
           new THREE.Vector3(
-            -camera.getWorldDirection(new THREE.Vector3(0, 0, 0)).x,
+            -cameraWorldDireciton.x,
             0,
-            -camera.getWorldDirection(new THREE.Vector3(0, 0, 0)).z
+            -cameraWorldDireciton.z
           ).multiplyScalar(translationDz)
         );
       }
     }
 
     // Laser foar testing
-    scene.remove(arrowRef.current);
+    if (arrowRef.current) scene.remove(arrowRef.current);
     arrowRef.current = new THREE.ArrowHelper(
-      camera.getWorldDirection(new THREE.Vector3(0, 0, 0)),
-      camera.getWorldPosition(new THREE.Vector3(0, 0, 0)),
+      camera.getWorldDirection(zeroVector),
+      camera.getWorldPosition(zeroVector),
       100,
       Math.random() * 0xffffff
     );
     scene.add(arrowRef.current);
-
-    // Laser foar testing
-    scene.remove(arrowRef2.current);
-    arrowRef2.current = new THREE.ArrowHelper(
-      player.getWorldDirection(new THREE.Vector3(0, 0, 0)),
-      player.getWorldPosition(new THREE.Vector3(0, 0, 0)),
-      100,
-      0xff0000
-    );
-    scene.add(arrowRef2.current);
   });
   return null;
 }
