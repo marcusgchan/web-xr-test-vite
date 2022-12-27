@@ -118,7 +118,7 @@ function PlayerController({
 
     // In the future make player body turn when the camera reaches a certain threshold
 
-    const cameraWorldDireciton = camera
+    const cameraWorldDirecitonNormalized = camera
       .getWorldDirection(new THREE.Vector3(0, 0, 0))
       .normalize();
 
@@ -138,9 +138,9 @@ function PlayerController({
           delta * translationSpeed * leftControllerGamepad.axes[2];
         player.position.add(
           new THREE.Vector3(
-            cameraWorldDireciton.cross(yBasisVector).x,
+            cameraWorldDirecitonNormalized.clone().cross(yBasisVector).x,
             0,
-            cameraWorldDireciton.cross(yBasisVector).z
+            cameraWorldDirecitonNormalized.clone().cross(yBasisVector).z
           ).multiplyScalar(translationDx)
         );
       }
@@ -149,9 +149,9 @@ function PlayerController({
           delta * translationSpeed * leftControllerGamepad.axes[3];
         player.position.add(
           new THREE.Vector3(
-            -cameraWorldDireciton.x,
+            -cameraWorldDirecitonNormalized.x,
             0,
-            -cameraWorldDireciton.z
+            -cameraWorldDirecitonNormalized.z
           ).multiplyScalar(translationDz)
         );
       }
