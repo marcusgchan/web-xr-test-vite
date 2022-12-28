@@ -12,10 +12,25 @@ import {
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
+import { createSpeechlySpeechRecognition } from "@speechly/speech-recognition-polyfill";
+import regeneratorRuntime from "regenerator-runtime";
 
 function App() {
   const model = useGLTF("./Fox.gltf");
-  const schoolModel = useGLTF("./classroom.gltf");
+  // const schoolModel = useGLTF("./classroom.gltf");
+  const appId = "<Insert key here>";
+  const SpeechlySpeechRecognition = createSpeechlySpeechRecognition(appId);
+  SpeechRecognition.applyPolyfill(SpeechlySpeechRecognition);
+  // const {
+  //   transcript,
+  //   listening,
+  //   browserSupportsSpeechRecognition,
+  //   isMicrophoneAvailable,
+  //   resetTranscript,
+  // } = useSpeechRecognition({});
 
   return (
     <div className="App">
@@ -61,11 +76,16 @@ function App() {
               </mesh>
             </Interactive>
           </group> */}
-            <primitive
+            <mesh scale={[1, 1, 1]}>
+              <boxGeometry />
+              <meshBasicMaterial color="red" />
+            </mesh>
+            {/* <p>{transcript}</p> */}
+            {/* <primitive
               scale={1}
               object={schoolModel.scene}
               position={[0, 0, 3]}
-            />
+            /> */}
             <primitive
               object={model.scene}
               scale={0.02}
